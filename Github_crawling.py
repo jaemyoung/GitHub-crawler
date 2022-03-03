@@ -5,11 +5,18 @@ Created on Mon Oct 26 17:28:14 2020
 @author: Injo Kim
 """
 from github import Github
-from material import crawling_material
 import numpy as np
 import pandas as pd
 import time
 
+from github import Github
+
+from material import crawling_material
+# using an access token
+g = Github("https://github.com/jaemyoung")
+u = g.get_user()
+u.get_repo()
+g = Github(base_url="https://github.com/jaemyoung")
 #%%
 def crawling_data(repo, crawled_data, idx, keyword) :
     try :
