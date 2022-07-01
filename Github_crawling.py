@@ -1,22 +1,9 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Oct 26 17:28:14 2020
-
-@author: Injo Kim
-"""
 from github import Github
+from material_ import crawling_material
 import numpy as np
 import pandas as pd
 import time
 
-from github import Github
-
-from material import crawling_material
-# using an access token
-g = Github("https://github.com/jaemyoung")
-u = g.get_user()
-u.get_repo()
-g = Github(base_url="https://github.com/jaemyoung")
 #%%
 def crawling_data(repo, crawled_data, idx, keyword) :
     try :
@@ -27,12 +14,12 @@ def crawling_data(repo, crawled_data, idx, keyword) :
     	try :
             row = [idx, repo.id, repo.name, repo.owner.id, owner_type, repo.full_name, repo.created_at, repo.updated_at, repo.get_topics(), repo.language, 
                contributors, len(contributors), repo.stargazers_count, repo.forks_count, keyword, crawling_material.url_organizer(url), repo.get_readme().size, repo.fork, 
-               repo.open_issues, repo.parent]
-        
+               repo.open_issues, repo.parent, repo.contents_url,repo.description] # description 추가
+        repos.commits_count
     	except :
         	row = [idx, repo.id, repo.name, repo.owner.id, owner_type, repo.full_name, repo.created_at, repo.updated_at, repo.get_topics(), repo.language, 
                contributors, len(contributors), repo.stargazers_count, repo.forks_count, keyword, crawling_material.url_organizer(url), None, repo.fork, 
-               repo.open_issues, repo.parent]
+               repo.open_issues, repo.parent, repo.contents_url,repo.description] # readme 없을 떄
     
     	crawled_data.append(row)
         
@@ -71,12 +58,12 @@ def save_data(crawled_data, year, mode) :
     
     if mode == 'repo' :
         data = crawling_material.data_processing(pd.DataFrame(crawled_data, columns=crawling_material.repository_column), ['topics', 'contributors'])
-        data.to_csv('crawled_data/data' + '_' + str(year)  + '.csv', mode='a', index=False, header=False)
+        data.to_csv('C:/Users/user/Documents/GitHub/GitHub-crawler/crawled_data/' + '_' + str(year)  + '.csv', mode='a', index=False)
         print('csv saved \n')
         
     elif mode == 'user' :
         data = crawling_material.data_processing(pd.DataFrame(crawled_data, columns=crawling_material.user_column), ['repo_id', 'followers', 'following', 'organization_list'])
-        data.to_csv('crawled_data/user_' + str(year) + '.csv', index=False)
+        data.to_csv('C:/Users/user/Documents/GitHub/GitHub-crawler/crawled_data/' + str(year) + '.csv', index=False)
 
 
 def search_by_keyword(start_date, end_date, save_point) :
@@ -119,23 +106,21 @@ def search_by_keyword(start_date, end_date, save_point) :
 
 
 
-
 #%%
 if __name__ == '__main__' :
    
     # set constant 
-    ACCESS_TOKEN = open('material/access_token.txt', 'r').readlines()
-    INJO_TOKEN = ACCESS_TOKEN[0][:-1] ; JUNGMIN_TOKEN = ACCESS_TOKEN[1][:-1]; JAEHAN_TOKEN = ACCESS_TOKEN[3]
+    ACCESS_TOKEN = ["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"]
+    #INJO_TOKEN = ACCESS_TOKEN[0][:-1] ; JUNGMIN_TOKEN = ACCESS_TOKEN[1][:-1]; JAEHAN_TOKEN = ACCESS_TOKEN[3]
     SAVE_POINT = 0
     
-    git = Github(JAEHAN_TOKEN)
+    git = Github(ACCESS_TOKEN[0])
 
 
     # topics 
     # machine-leaning
     # processed : image-processing, deep-learning
     # complete : aritificial-intelligence, autonomous-vehicle, automl, nlp, speech-recognition
-    search_by_keyword('2016-01-01', '2016-12-31', SAVE_POINT)
+    search_by_keyword('20-01-01','2022-01-30', SAVE_POINT)
 
     del git
-        
