@@ -158,14 +158,23 @@ def get_organization(repo) :
     return row
 
 #빈 리스트 제거
-IBM_repo =list(filter(None, IBM_repo))
+intel_repo =list(filter(None, intel_repo))
 #중복 리스트 value 제거
 set()
 
-organization = git.get_organization("google")
+git = Github("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") #8/04 재명 토큰
+git = Github("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") #근수형
+organization = git.get_organization("intel")
 user = git.get_user_by_id(organization.id)
 repos = repos = [repo for repo in user.get_repos()]
 
+intel_repo = []
+for repo in repos[490:]: 
+    if len(intel_repo) - len(list(filter(None,intel_repo)))<10:
+        intel_repo.append(get_organization(repo))
+    else:
+        break
+    
 aws_repo = []
 for repo in repos:
     if len(list(filter(None,aws_repo)))> 10:
@@ -202,16 +211,16 @@ for repo in repos[1567:]:
         break
 
 import pickle
-file_path = "C:/Users/user/Documents/GitHub/GitHub-crawler/crawled_data/meta.pickle"
+file_path = "C:/Users/user/Documents/GitHub/GitHub-crawler/crawled_data/intel.pickle"
 with open(file_path,"wb") as fw:
-    pickle.dump(meta_repo, fw)   
+    pickle.dump(intel_repo, fw)   
     
 #%% 크롤링 데이터 결합
 import pickle
 file_path = "C:/Users/user/Documents/GitHub/GitHub-crawler/crawled_data/microsoft.pickle"
 with open(file_path,"rb") as fr:
     microsoft = pickle.load(fr) 
-    del microsoft[0]
+
 file_path = "C:/Users/user/Documents/GitHub/GitHub-crawler/crawled_data/IBM.pickle"
 with open(file_path,"rb") as fr:
     IBM = pickle.load(fr) 
@@ -227,15 +236,44 @@ with open(file_path,"rb") as fr:
 file_path = "C:/Users/user/Documents/GitHub/GitHub-crawler/crawled_data/meta.pickle"
 with open(file_path,"rb") as fr:
     meta = pickle.load(fr) 
-#데이터 결합
-total_data = microsoft + IBM + google + aws + meta
 
-data = []
-for row in total_data[4881:]: # 중간 null값 제외
-    new = [row[1],row[3],row[4],row[5],row[6],row[9],row[10],row[11],row[17]]# ['repo_name', 'full_name', 'create_date', 'update_date', 'topics','contributro_counts','stargazer_counts', 'forker_counts',"description"]
+file_path = "C:/Users/user/Documents/GitHub/GitHub-crawler/crawled_data/intel.pickle"
+with open(file_path,"rb") as fr:
+    intel = pickle.load(fr) 
+    
+#데이터 결합
+total_data = microsoft + IBM + google + aws + intel + meta
+#빈 리스트 제거 후 dataframe 생성
+total_data =list(filter(None, total_data))
+total_data = pd.DataFrame(total_data, columns= ['repo.id', 'repo.name', 'repo.owner.id', 'repo.full_name', 'repo.created_at', 'repo.updated_at', 'repo.get_topics()', 'repo.language', 
+               'contributors', 'len(contributors)', 'repo.stargazers_count', 'repo.forks_count', 'repo.get_readme()', 'repo.fork', 
+               'repo.open_issues', 'repo.parent', 'repo.contents_url', 'repo.description'])
+repo.name
+repo.network_count
+
+for row in total_data: # 중간 null값 제외
+    print(list(row[6])
+    break
+    new = [row[1],row[3],row[7],row[4],row[5],row[6],row[9],row[10],row[11],row[17]]# ['repo_name', 'full_name', 'create_date', 'update_date', 'topics','contributro_counts','stargazer_counts', 'forker_counts',"description"]
     data.append(new)
 
-data = pd.DataFrame(data, columns=['repo_name', 'full_name', 'create_date', 'update_date', 'topics','contributro_counts','stargazer_counts', 'forker_counts',"description"])
-data.to_csv('C:/Users/user/Documents/GitHub/GitHub-crawler/crawled_data/total_organiztion_10224repo.csv', mode='a', index=False)
+data = pd.DataFrame(data, columns=['repo_name', 'full_name', 'programing_language','create_date', 'update_date', 'topics','contributro_counts','stargazer_counts', 'forker_counts',"description"])
+data.to_csv('C:/Users/user/Documents/GitHub/GitHub-crawler/crawled_data/total_organiztion_11106repo.csv', mode='a', index=False)
     
-  
+#%%
+data = pd.read_csv("C:/Users/user/Documents/GitHub/GitHub-crawler/crawled_data/total_organiztion_11106repo.csv")
+
+data["owner"] = data["full_name"].apply(lambda x: x.split("/")[0])
+data["topic_exists"] = data["topics"].apply(lambda x : x if len(x)>2 else None) # topic이 존재하는 repo만 추출
+data = data.dropna(axis= 0)
+data[data["owner"] == "microsoft"] 
+data[data["owner"] == "IBM"]
+data[data["owner"] == "google"]
+data[data["owner"] == "aws"]
+data[data["owner"] == "intel"]
+data[data["owner"] == "facebook"]
+
+data["after_topics"]=data["topics"].apply(lambda x : x.replace(",","").replace("[","").replace("]","").replace("'","").split(" ")) # 문자열 -> 리스트로 변환
+data = data.reset_index()
+data.to_csv("C:/Users/user/Documents/GitHub/GitHub-crawler/crawled_data/2332.csv")
+
